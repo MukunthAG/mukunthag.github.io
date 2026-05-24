@@ -1,0 +1,1258 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Circuit Breaker That Went to Germany</title>
+<style>
+  :root {
+    --bg: #fbf8f3;
+    --paper: #ffffff;
+    --ink: #2a2a2a;
+    --muted: #6b6b6b;
+    --accent: #7a1e1e;
+    --accent-soft: #f3e3e3;
+    --rule: #e5dfd3;
+    --ref-bg: #fff8e7;
+    --ref-border: #d4b25a;
+    --link: #1b5e9c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    line-height: 1.7;
+  }
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 60px 32px 120px;
+  }
+  header.cover {
+    text-align: center;
+    padding: 60px 0 40px;
+    border-bottom: 2px double var(--rule);
+    margin-bottom: 40px;
+  }
+  header.cover .eyebrow {
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  header.cover h1 {
+    font-size: 42px;
+    line-height: 1.15;
+    margin: 0 0 18px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  header.cover .sub {
+    font-style: italic;
+    color: var(--muted);
+    font-size: 17px;
+    max-width: 620px;
+    margin: 0 auto;
+  }
+  nav.toc {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 20px 28px;
+    margin-bottom: 50px;
+    font-size: 14px;
+  }
+  nav.toc h3 {
+    margin: 0 0 12px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+  }
+  nav.toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 30px; }
+  nav.toc a { color: var(--ink); text-decoration: none; }
+  nav.toc a:hover { color: var(--accent); text-decoration: underline; }
+  h2.act {
+    font-size: 26px;
+    margin: 60px 0 8px;
+    color: var(--accent);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 8px;
+  }
+  h2.act .num {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    font-weight: normal;
+    margin-bottom: 6px;
+  }
+  p { margin: 0 0 14px; }
+  .dialogue {
+    margin: 8px 0 14px 24px;
+    padding-left: 14px;
+    border-left: 2px solid var(--rule);
+    color: #333;
+  }
+  .ref-link {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent);
+    text-decoration: none;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    margin: 0 2px;
+    vertical-align: middle;
+    border: 1px solid #e6c8c8;
+  }
+  .ref-link:hover { background: var(--accent); color: #fff; }
+  .back-link {
+    font-size: 12px;
+    color: var(--link);
+    text-decoration: none;
+    margin-left: 8px;
+  }
+  .back-link:hover { text-decoration: underline; }
+  hr.scene {
+    border: 0;
+    text-align: center;
+    margin: 30px 0;
+  }
+  hr.scene:after {
+    content: "âœ¦ âœ¦ âœ¦";
+    color: var(--rule);
+    letter-spacing: 8px;
+  }
+  /* References */
+  section.references {
+    margin-top: 100px;
+    padding-top: 40px;
+    border-top: 3px double var(--accent);
+  }
+  section.references > h2 {
+    font-size: 32px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  section.references > .intro {
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 40px;
+  }
+  article.ref {
+    background: var(--paper);
+    border-left: 4px solid var(--ref-border);
+    border-radius: 4px;
+    padding: 20px 26px;
+    margin: 0 0 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    font-family: -apple-system, "Segoe UI", Tahoma, sans-serif;
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+  article.ref h3 {
+    margin: 0 0 14px;
+    color: var(--accent);
+    font-size: 18px;
+  }
+  article.ref h3 .tag {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-right: 10px;
+    vertical-align: middle;
+    letter-spacing: 1px;
+  }
+  article.ref .field {
+    margin: 8px 0;
+  }
+  article.ref .field-label {
+    font-weight: bold;
+    color: #444;
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+  article.ref ul { margin: 4px 0 4px 18px; padding: 0; }
+  article.ref li { margin: 2px 0; }
+  article.ref code,
+  article.ref .mono {
+    font-family: "SF Mono", Consolas, monospace;
+    background: #f4efe4;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 13px;
+  }
+  article.ref .deep {
+    background: #f9f4ea;
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-top: 10px;
+    font-style: italic;
+  }
+  article.ref .risk {
+    background: #fdecec;
+    border-left: 3px solid #c0392b;
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-top: 8px;
+    font-size: 14px;
+  }
+  article.ref .risk strong { color: #a32d2d; }
+  /* Summary section */
+  section.summary {
+    margin-top: 80px;
+    padding: 30px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 14.5px;
+  }
+  section.summary h2 {
+    color: var(--accent);
+    margin-top: 0;
+  }
+  section.summary h3 {
+    margin-top: 22px;
+    color: #444;
+    font-size: 16px;
+    border-bottom: 1px dashed var(--rule);
+    padding-bottom: 4px;
+  }
+  section.summary ol li { margin: 4px 0; }
+  footer.colophon {
+    text-align: center;
+    margin-top: 80px;
+    padding-top: 30px;
+    border-top: 1px solid var(--rule);
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  @media (max-width: 600px) {
+    .wrap { padding: 30px 18px 60px; }
+    header.cover h1 { font-size: 30px; }
+    nav.toc ol { columns: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="cover">
+  <div class="eyebrow">A Corporate Drama in Twenty Acts</div>
+  <h1>The Circuit Breaker<br>That Went to Germany</h1>
+  <p class="sub">Fifty thousand tiny electrical devices, seventeen tired humans, six enterprise systems, three countries, one customer, and a supply chain that survived mainly because people kept pretending everything was under control.</p>
+</header>
+
+<nav class="toc">
+  <h3>Contents</h3>
+  <ol>
+    <li><a href="#prologue">Prologue - A Small Object with a Large Destiny</a></li>
+    <li><a href="#act1">Act 1 - Anna Muller</a></li>
+    <li><a href="#act2">Act 2 - The Quote, the Cat, and the Lie of Easy Delivery</a></li>
+    <li><a href="#act3">Act 3 - SAP Checks Reality</a></li>
+    <li><a href="#act4">Act 4 - Priya Nair and the Sacred Art</a></li>
+    <li><a href="#act5">Act 5 - Arjun Rao</a></li>
+    <li><a href="#act6">Act 6 - Gossip in the Cafeteria</a></li>
+    <li><a href="#act7">Act 7 - Arrival of Components</a></li>
+    <li><a href="#act8">Act 8 - Sunita and the Copper</a></li>
+    <li><a href="#act9">Act 9 - The Factory Floor</a></li>
+    <li><a href="#act10">Act 10 - The Birth of Finished Goods</a></li>
+    <li><a href="#act11">Act 11 - The Intercompany Plot Twist</a></li>
+    <li><a href="#act12">Act 12 - GTS, the Border Guard</a></li>
+    <li><a href="#act13">Act 13 - The Export Picking Opera</a></li>
+    <li><a href="#act14">Act 14 - The Container Leaves India</a></li>
+    <li><a href="#act15">Act 15 - Berlin Asks the Question</a></li>
+    <li><a href="#act16">Act 16 - Hamburg, Efficiently Cloudy</a></li>
+    <li><a href="#act17">Act 17 - The Final Delivery</a></li>
+    <li><a href="#act18">Act 18 - The Complaint</a></li>
+    <li><a href="#act19">Act 19 - The Review Meeting</a></li>
+    <li><a href="#act20">Act 20 - After the Storm</a></li>
+    <li><a href="#epilogue">Epilogue</a></li>
+    <li><a href="#references">Technical References</a></li>
+  </ol>
+</nav>
+
+<!-- STORY -->
+<section id="story">
+
+<h2 class="act" id="prologue"><span class="num">Prologue</span>A Small Object with a Large Destiny</h2>
+<p>If you held one of ElectraGrid's miniature circuit breakers in your hand, you would not think much of it.</p>
+<p>It was small. White. Rectangular. Modest.</p>
+<p>A neat little device designed to sit inside an electrical panel and protect homes from overloads, short circuits, and the occasional optimism of human wiring.</p>
+<p>Its name was <strong>MCB-16A-1P</strong>.</p>
+<p>A very unattractive name, yes, but corporate products are rarely named by poets.</p>
+<p>Inside the company, however, this little product was not just plastic, copper, spring, screws, and packaging. It was a promise.</p>
+<p>To the engineer, it was a design. To the planner, it was demand. To the buyer, it was a shortage waiting to happen. To the factory, it was a production order. To the warehouse, it was a pallet. To the customer, it was revenue. To finance, it was margin. To SAP, it was master data. To Salesforce, it was an opportunity. To Manhattan WMS, it was something that had better be in the correct bin.</p>
+<p>And to Markus Weber in Berlin, it was simple:</p>
+<p class="dialogue">"I need fifty thousand of them before July 25."</p>
+<p>That sentence, spoken casually in a meeting room, would soon disturb offices in Germany, India, Thailand, the Netherlands, and at least one man's sleep cycle in middleware support.</p>
+<p>This is that story.</p>
+
+<h2 class="act" id="act1"><span class="num">Act 1</span>Anna Muller, Who Sold Things Before They Existed</h2>
+<p>Anna Muller was the kind of salesperson who could make a customer feel heard, a manager feel impressed, and a supply planner feel betrayed - all before lunch.</p>
+<p>She worked from Berlin, wore excellent jackets, and had a gift for saying phrases like "strategic partnership" with the calm sincerity of a diplomat signing a peace treaty.</p>
+<p>Her apartment overlooked a quiet street with chestnut trees. Her cat, Herr Mozart, disliked everyone except delivery drivers. Anna's mother still believed she worked "in computers," which was close enough to the truth if one considered all modern suffering to be computer-related.</p>
+<p>That morning, Anna sat in a glass meeting room at VoltHaus GmbH across from Markus Weber.</p>
+<p>Markus was a buyer. Not a charming buyer. A buyer. He had the facial expression of a man who had spent fifteen years asking suppliers for discounts and had slowly become the discount.</p>
+<p>He opened his laptop.</p>
+<p class="dialogue">"Anna, summer campaign. Residential electrical panels. We need fifty thousand MCB-16A-1P units before July 25."</p>
+<p>Anna smiled.</p>
+<p class="dialogue">"Wonderful. That sounds like a strategic opportunity."</p>
+<p>Markus looked at her.</p>
+<p class="dialogue">"I said I need circuit breakers."</p>
+<p class="dialogue">"Yes," Anna said. "Strategically."</p>
+<p>She opened Salesforce and created an opportunity. <a href="#ref-01" class="ref-link">REF-01</a></p>
+<p>Opportunity name: Summer Residential Panel Campaign. Customer: VoltHaus GmbH. Quantity: 50,000. Expected revenue: 300,000 euros. Probability: 70 percent.</p>
+<p>Anna paused at probability. Salespeople loved probability because it allowed them to be both hopeful and not legally responsible. She set it to 85 percent.</p>
+<p>Markus watched her type.</p>
+<p class="dialogue">"Do you actually have stock?"</p>
+<p>Anna smiled again, more carefully this time.</p>
+<p class="dialogue">"We have a very strong supply chain."</p>
+<p>That was not an answer. It was a curtain.</p>
+<p>Behind the curtain, SAP was asleep. Not literally, of course. SAP does not sleep. SAP waits.</p>
+<p>Salesforce, meanwhile, was delighted. Salesforce loved this stage of life: conversations, optimism, customer notes, potential revenue, future smiles.</p>
+<p>SAP did not care about potential. SAP cared when someone made a promise that affected stock, money, production, and somebody's weekend.</p>
+<p>At 10:14 a.m., Markus said:</p>
+<p class="dialogue">"Send me a quote."</p>
+<p>And the first domino leaned forward.</p>
+
+<h2 class="act" id="act2"><span class="num">Act 2</span>The Quote, the Cat, and the Lie of Easy Delivery</h2>
+<p>That evening, Anna worked from home. Herr Mozart sat on her keyboard, contributing several semicolons to the quotation notes.</p>
+<p>Anna pushed him aside.</p>
+<p class="dialogue">"No, Mozart. Not now. Germany needs protection from electrical overloads."</p>
+<p>Mozart looked unconvinced.</p>
+<p>Anna prepared the quote: 50,000 units. 6 euros each. Delivery before July 25. Payment in 30 days. Delivered to Berlin. She sent it.</p>
+<p>Then she texted her colleague Lena:</p>
+<p class="dialogue">Anna: Big VoltHaus deal. 300k. Might close tomorrow.<br>
+Lena: Do we have stock?<br>
+Anna: Define "have."<br>
+Lena: Anna.<br>
+Anna: There is stock somewhere in the world. Spiritually.</p>
+<p>The next morning, Markus accepted. Anna marked the opportunity Closed Won in Salesforce. <a href="#ref-02" class="ref-link">REF-02</a></p>
+<p>Salesforce celebrated in its quiet digital way. A message left Salesforce and traveled through middleware toward SAP. This message carried the customer, product, quantity, delivery date, payment terms, and destination.</p>
+<p>In the middleware monitoring room, Omar Haddad saw the message arrive. Omar was the integration architect. He was Lebanese, lived in Paris, and had the calm eyes of a man who had seen error logs at 2 a.m. and no longer feared ordinary life. He had two children, a bonsai tree, and a persistent neck pain named "legacy interface."</p>
+<p>His wife, Samira, often asked: "Why are systems not talking to each other? Are they shy?" Omar never knew how to answer.</p>
+<p>That morning, he watched the Salesforce-to-SAP message.</p>
+<p class="dialogue">"Please map correctly," he whispered.</p>
+<p>The message passed validation. Omar leaned back. "Small mercy."</p>
+<p>In SAP, a sales order was born. <a href="#ref-03" class="ref-link">REF-03</a></p>
+<p>Sales order <span style="font-family:monospace">5000123456</span>. Fifty thousand MCBs. VoltHaus GmbH. Berlin. July 25.</p>
+<p>SAP opened one eye. "Ah," said SAP, metaphorically. "A promise."</p>
+
+<h2 class="act" id="act3"><span class="num">Act 3</span>SAP Checks Reality and Finds It Understocked</h2>
+<p>The sales order triggered an availability check. <a href="#ref-04" class="ref-link">REF-04</a></p>
+<p>SAP looked into Hamburg Distribution Center. There were 8,000 units. SAP looked again, because sometimes numbers are disappointing the first time. Still 8,000.</p>
+<p>Required: 50,000. Shortage: 42,000.</p>
+<p>SAP did not panic. SAP was not paid to panic. SAP was paid to expose panic in structured fields.</p>
+<p>Anna received the confirmation update. Only 8,000 immediately available. The remaining 42,000 had to be produced in Bangalore.</p>
+<p>Anna stared at the screen. Herr Mozart walked across the desk and knocked over a pen.</p>
+<p class="dialogue">"Not helpful," Anna said.</p>
+<p>She called Ravi Menon. Ravi was the demand planner. Ravi lived in Bangalore with his wife, Ananya, who taught economics, and their seven-year-old daughter Meera, who believed her father's job was "making Excel angry."</p>
+<p>Ravi had the spiritual exhaustion of a man who forecasted the future using historical data, sales assumptions, and vibes. He answered the call.</p>
+<p class="dialogue">"Anna."<br>
+"Ravi, good news."</p>
+<p>Ravi closed his eyes. In supply chain, "good news" from sales was usually a problem wearing lipstick.</p>
+<p class="dialogue">"VoltHaus confirmed the summer campaign. Fifty thousand units."<br>
+"How many do we have?"<br>
+"Eight thousand in Hamburg."</p>
+<p>There was silence. Ravi looked at the office ceiling. The ceiling had heard many such silences.</p>
+<p class="dialogue">"So," Ravi said, "forty-two thousand have to appear."<br>
+"Not appear," Anna said. "Be produced."<br>
+"That is a very elegant way to describe appearing."</p>
+
+<h2 class="act" id="act4"><span class="num">Act 4</span>Priya Nair and the Sacred Art of Making Chaos Look Scheduled</h2>
+<p>Ravi walked to Priya Nair's desk. Priya was the production planner for Bangalore Plant. She was thirty-eight, sharp, calm, and famous for replying to long emotional emails with one line: "Please confirm quantity and date."</p>
+<p>Her husband, Dev, ran a small cafe that served filter coffee strong enough to restart dead machinery. Her teenage son, Vihaan, had recently discovered electric guitar, meaning Priya handled supply shortages at work and Metallica at home.</p>
+<p>Priya opened the planning screen.</p>
+<p class="dialogue">"Sales order?"<br>
+Ravi gave the number.<br>
+"Forty-two thousand additional units."<br>
+"Yes."<br>
+"By when?"<br>
+"Germany needs customer delivery by July 25."</p>
+<p>Priya did the mental math of manufacturing lead time, component availability, transport, customs, warehouse processing, and the number of gods one might reasonably pray to.</p>
+<p class="dialogue">"We need production complete by July 10."</p>
+<p>Ravi nodded. Priya ran planning. <a href="#ref-05" class="ref-link">REF-05</a></p>
+<p>The system exploded the product recipe. To make 42,000 circuit breakers, the plant needed: 84,000 copper contacts. 42,000 plastic housings. 42,000 trip springs. 168,000 screws. 42,000 German-language cartons.</p>
+<p>Priya read the shortage list.</p>
+<p class="dialogue">"Copper contacts short. German cartons short."</p>
+<p>Ravi sighed. "Of course the boxes are a problem."</p>
+<p>Priya said, "Never underestimate packaging. Packaging waits until the last moment, then destroys empires."</p>
+<p>Planning created internal buying requests for missing components. <a href="#ref-06" class="ref-link">REF-06</a></p>
+<p>Priya turned to Ravi. "Procurement must act today."</p>
+<p>Ravi smiled weakly. "Arjun will be thrilled."</p>
+<p>Priya looked at him. "No, he will be Arjun."</p>
+
+<h2 class="act" id="act5"><span class="num">Act 5</span>Arjun Rao, Professional Doubter of Suppliers</h2>
+<p>Arjun Rao sat two floors below, eating a masala dosa over his keyboard with the confidence of a man who had accepted risk as a lifestyle. He was a procurement buyer. His job was to ask suppliers to deliver faster, cheaper, and with more documentation than any reasonable universe allowed.</p>
+<p>He had a fiancee named Kavya, who was planning their wedding with terrifying precision. Arjun privately believed wedding vendors and industrial suppliers were the same species: both promised delivery dates with devotional confidence and then blamed traffic.</p>
+<p>Priya called him.</p>
+<p class="dialogue">"Arjun, two urgent PRs. Copper contacts and German cartons."<br>
+"German cartons?"<br>
+"For VoltHaus."<br>
+"Why does Germany need special cartons?"<br>
+"Because German regulations, customer labeling, and destiny."</p>
+<p>Arjun converted the purchase requests into purchase orders. <a href="#ref-07" class="ref-link">REF-07</a></p>
+<p>Copper contacts from Nippon Metals Thailand. German cartons from PackPro India.</p>
+<p>He called Nippon Metals.</p>
+<p class="dialogue">"Can you deliver 84,000 copper contacts by July 3?"<br>
+The supplier said, "We will try our best."</p>
+<p>Arjun wrote in his notebook: <em>Supplier said: try best. Meaning: begin worrying.</em></p>
+<p>He called PackPro.</p>
+<p class="dialogue">"German cartons. Exact artwork. No spelling mistakes. Delivery July 3."<br>
+PackPro said, "Yes, sir, no issue."</p>
+<p>Arjun underlined "no issue" three times. In procurement, "no issue" was usually the first symptom of an issue.</p>
+<p>Meanwhile, SAP recorded the purchase orders officially. <a href="#ref-08" class="ref-link">REF-08</a></p>
+<p>Ariba, the supplier collaboration platform, handled confirmations and supplier communication. <a href="#ref-09" class="ref-link">REF-09</a></p>
+<p>Arjun leaned back. Priya messaged him:</p>
+<p class="dialogue">Priya: Confirmed?<br>
+Arjun: Suppliers confirmed.<br>
+Priya: Real confirmed or supplier confirmed?<br>
+Arjun: Don't be philosophical.</p>
+
+<h2 class="act" id="act6"><span class="num">Act 6</span>Gossip in the Cafeteria</h2>
+<p>At lunch, the Bangalore cafeteria buzzed. Someone had seen Anna from Germany on a video call. Someone said the VoltHaus deal was worth 300,000 euros. Someone else said sales had promised delivery before production even started. Everyone agreed this sounded very sales.</p>
+<p>Karthik Iyer, warehouse supervisor, sat with Sunita Das from Quality. Karthik was a broad-shouldered man with a thick mustache and a permanent suspicion of inventory reports. He trusted scanners, labels, and human sweat. He did not trust "system stock" unless a pallet had physically introduced itself.</p>
+<p>His wife, Lakshmi, ran an online baking business. Every December, Karthik managed cake logistics at home and warehouse logistics at work, and frankly preferred the warehouse because pallets did not ask for frosting flowers.</p>
+<p>Sunita Das sat opposite him. Sunita was a quality inspector and the only person in the plant who could make a supplier nervous by saying "Good morning." She lived with her widowed father, a retired chemistry professor who still corrected toothpaste advertisements for scientific accuracy.</p>
+<p class="dialogue">Karthik: "I hear German cartons are coming."<br>
+Sunita: "Then I hear German complaints are coming if they are wrong."<br>
+Karthik: "Production wants everything fast."<br>
+Sunita: "Quality wants everything correct."<br>
+Karthik: "Warehouse wants everything labeled."<br>
+Sunita: "Finance wants everything valued."<br>
+Together: "Sales wants everything yesterday."</p>
+<p>They laughed. Behind them, a junior planner whispered: "Did you hear Arjun's wedding caterer cancelled?"</p>
+<p class="dialogue">Karthik: "Procurement man cannot secure his own samosas?"<br>
+Sunita: "Don't mock. He will raise a purchase order for marriage snacks."<br>
+Karthik: "With three-way match?"<br>
+Sunita: "Bride, groom, invoice."</p>
+<p>They laughed again. The supply chain, briefly, was human.</p>
+
+<h2 class="act" id="act7"><span class="num">Act 7</span>The Arrival of Components and the Tyranny of Scanners</h2>
+<p>July 3. The receiving dock at Bangalore was already hot by 9 a.m. The copper contacts arrived first. Then the German cartons.</p>
+<p>Karthik stood at the dock with a scanner in one hand and suspicion in the other.</p>
+<p class="dialogue">"Scan everything," he told the team. "If it is not scanned, it is a rumor."</p>
+<p>In Manhattan WMS, the warehouse team recorded pallets, quantities, bins, and receiving details. <a href="#ref-10" class="ref-link">REF-10</a></p>
+<p>Manhattan WMS was not interested in corporate poetry. It wanted to know: Which pallet? Which dock? Which bin? Which operator? Which timestamp? Which label? Which exception?</p>
+<p>A new trainee named Manoj stood beside Karthik with the expression of a man who had agreed to a job and accidentally joined a vocabulary exam.</p>
+<p class="dialogue">"Sir, what exactly is a pallet, and why is everyone saying bin like it is obvious?"</p>
+<p>Karthik turned. "Good question. If you do not know the words, the warehouse sounds like people arguing in code."</p>
+<p>He pointed at the wooden platform under the cartons. <em>"Pallet:</em> the base on which material is stacked so forklift, scanner, and human anxiety can move it together."</p>
+<p>He pointed toward the marked receiving gate. <em>"Dock:</em> the receiving point where the truck meets the warehouse and everyone pretends timing is under control."</p>
+<p>Then he pointed at a storage rack location. <em>"Bin:</em> the exact home inside the warehouse where stock is placed. Not a philosophical concept. A real address."</p>
+<p class="dialogue">Manoj: "And operator?"<br>
+Karthik: "The person doing the transaction. In every audit story, that name becomes very important."<br>
+"Timestamp?"<br>
+"When it happened. Because memory is weak, but system time is merciless."<br>
+"Label?"<br>
+"The printed identity card of the pallet or carton. Scan it, and the system knows what it is supposed to be."<br>
+"Exception?"<br>
+"Anything that ruins a peaceful afternoon. Damaged box. Wrong quantity. Wrong barcode. Material sent by a supplier who believes accuracy is a Western conspiracy."</p>
+<p>Sunita, walking past with a clipboard, added: "Warehouse terms are simple. They only sound difficult until one truck arrives incorrectly."</p>
+<p>SAP, meanwhile, waited for the official goods receipt. <a href="#ref-11" class="ref-link">REF-11</a></p>
+<p>The systems shook hands through integration. Manhattan confirmed receipt. SAP posted inventory. Finance got accounting entries.</p>
+<p>Manoj, now brave enough to continue learning, asked, "And goods receipt means what exactly?"</p>
+<p>Nisha had arrived by then on a call, the way finance always arrived just in time to define consequences. She answered before Karthik could.</p>
+<p class="dialogue">"Goods receipt means SAP officially accepts that the material has physically arrived. Until then, people may have seen boxes. After that, the ERP sees stock."<br>
+"So stock increases?" Manoj asked.<br>
+"Yes," said Nisha. "Inventory goes up."<br>
+"And accounting entries?"</p>
+<p>Now Nisha smiled the dangerous smile of someone entering her natural habitat.</p>
+<p class="dialogue">"Accounting entry means finance is told the arrival has monetary impact. For valuated material, SAP usually debits inventory and credits GR/IR clearing."<br>
+"GR/IR?"<br>
+"Goods Receipt / Invoice Receipt. A temporary clearing account. It tells finance: material has arrived, invoice may come later, and we will keep both facts organized until they meet."</p>
+<p>Karthik tapped the scanner against the pallet. "Warehouse says, 'It is here.' Finance says, 'Fine, but prove it in accounting language.' SAP translates the marriage."</p>
+<p>Karthik watched the pallet labels print. "Good," he said. "Now they exist."</p>
+<p>Nisha Kapoor in finance felt the goods receipt before she saw it. Nisha worked from the shared services office in Pune. She was the kind of accountant who could identify a bad posting from across a room. She wore elegant kurtas, drank green tea she did not enjoy, and had a younger brother who kept asking if accounting would be replaced by AI.</p>
+<p class="dialogue">"Not before your rent is due," she always said.</p>
+<p>The goods receipt created a financial posting. <a href="#ref-12" class="ref-link">REF-12</a> Inventory increased. A clearing account was credited.</p>
+<p>Nisha smiled. "Balanced. For now." Finance people never fully smile at transactions. They smile like detectives at a crime scene where the footprints are clear.</p>
+
+<h2 class="act" id="act8"><span class="num">Act 8</span>Sunita and the Copper That Had to Prove Itself</h2>
+<p>Copper contacts could not go straight to production. Sunita intercepted them.</p>
+<p class="dialogue">"Inspection lot?"</p>
+<p>The system had created one. <a href="#ref-13" class="ref-link">REF-13</a></p>
+<p>She reviewed the supplier certificate. She selected samples. She measured dimensions. Checked coating. Checked conductivity. Compared results.</p>
+<p>A young warehouse assistant asked, "Madam, supplier is approved, no?"</p>
+<p>Sunita looked at him. "Approval is not a religion. We still verify." He nodded, the way people nod when they have just learned not to ask follow-up questions.</p>
+<p>The copper passed. Sunita recorded results and gave usage decision: accepted. <a href="#ref-14" class="ref-link">REF-14</a></p>
+<p>The stock moved from quality inspection to unrestricted use. <a href="#ref-15" class="ref-link">REF-15</a></p>
+<p>Production received the message. Priya exhaled.</p>
+<p class="dialogue">Arjun: Copper passed?<br>
+Sunita: Yes.<br>
+Arjun: Great.<br>
+Sunita: Tell supplier their certificate font is ugly.<br>
+Arjun: I will add to negotiation strategy.</p>
+
+<h2 class="act" id="act9"><span class="num">Act 9</span>The Factory Floor, Where Plans Meet Noise</h2>
+<p>Priya converted the planned order into a production order. <a href="#ref-16" class="ref-link">REF-16</a></p>
+<p>Production order <span style="font-family:monospace">1000789123</span>. Quantity: 42,000. Start: July 5. Finish: July 10.</p>
+<p>The order was released. <a href="#ref-17" class="ref-link">REF-17</a></p>
+<p>A released production order is a powerful thing. Before release, it is intention. After release, it is permission.</p>
+<p>The order went to the shop floor and to MES, the manufacturing execution system. <a href="#ref-18" class="ref-link">REF-18</a></p>
+<p>MES was the factory's storyteller. SAP said: <em>Produce 42,000.</em> MES said: Line 1 started at 08:02. Operator Ravi Kumar logged in. Machine stopped at 10:14 for sensor alarm. Scrap increased after lunch. Test station 3 is behaving like it has personal issues.</p>
+<p>On July 5, the assembly line began. Copper contacts met springs. Springs met housings. Screws did their tiny metallic duty. Labels were applied. Tests were performed.</p>
+<p>Operators scanned batches. Machines recorded cycles. MES sent confirmations back. Components were consumed. <a href="#ref-19" class="ref-link">REF-19</a> Operations were confirmed. <a href="#ref-20" class="ref-link">REF-20</a></p>
+<p>On the second day, Line 2 stopped. A sensor failed. Priya received the alert. She walked to the floor.</p>
+<p class="dialogue">The maintenance technician said, "Fifteen minutes."<br>
+Priya looked at him. "In factory language or actual language?"<br>
+He said, "Thirty."<br>
+Priya nodded. "Thank you for translating."</p>
+<p>By July 10, the order was complete. Planned: 42,000. Good units: 41,700. Scrap: 300. Rework: 200.</p>
+<p>Priya looked at the result. "Acceptable."</p>
+<p>Ravi asked, "Will Germany be covered?" "Yes. With existing Hamburg stock, yes."</p>
+<p>Somewhere in Berlin, Anna did not know how close she had come to needing a very creative customer email.</p>
+
+<h2 class="act" id="act10"><span class="num">Act 10</span>The Birth of Finished Goods</h2>
+<p>The finished circuit breakers were received into stock. <a href="#ref-21" class="ref-link">REF-21</a></p>
+<p>41,700 units entered finished goods inventory in Bangalore. SAP recorded the official stock and accounting. Manhattan WMS took over the physical warehouse detail.</p>
+<p>Karthik's team created pallets: <span style="font-family:monospace">PAL-INB1-4001, PAL-INB1-4002, PAL-INB1-4003</span> and many more.</p>
+<p class="dialogue">"Put them in export zone," Karthik said.</p>
+<p>A new operator placed one pallet in the wrong aisle. Manhattan complained. Karthik appeared like a warehouse ghost.</p>
+<p class="dialogue">"Why is this pallet in A-12?"<br>
+The operator swallowed. "I thought-"<br>
+Karthik raised one finger. "Never begin a warehouse sentence with 'I thought.' Begin with 'I scanned.'"</p>
+<p>The pallet was moved. Manhattan was satisfied.</p>
+<p>SAP did not know about the drama in aisle A-12. SAP only knew the inventory existed in the plant.</p>
+<p>And this is why companies use both: SAP for official enterprise truth. WMS for warehouse reality.</p>
+<p>The product was ready. But Germany was far away.</p>
+
+<h2 class="act" id="act11"><span class="num">Act 11</span>The Intercompany Plot Twist No One Explains at Parties</h2>
+<p>ElectraGrid did not simply ship directly to VoltHaus. That would be too easy, and global companies are legally allergic to easy.</p>
+<p>The Indian company manufactured the goods. The German company sold to the German customer. Therefore, goods had to move from the Indian company to the German distribution center before customer delivery.</p>
+<p>India: ElectraGrid India Pvt Ltd. Germany: ElectraGrid Germany GmbH. Two legal entities. Two company codes. One family, many tax opinions.</p>
+<p>Germany created a stock transfer request to India. <a href="#ref-22" class="ref-link">REF-22</a></p>
+<p>India prepared an outbound delivery to Hamburg. <a href="#ref-23" class="ref-link">REF-23</a></p>
+<p>Finance asked about transfer price. Tax asked about customs. Logistics asked about containers. Sales asked if the customer would still get delivery on time.</p>
+<p>Everyone asked questions. SAP created documents. This was the corporate way.</p>
+
+<h2 class="act" id="act12"><span class="num">Act 12</span>GTS, the Border Guard with a Clipboard</h2>
+<p>Before the goods could leave India, trade compliance had to approve.</p>
+<p>Enter SAP GTS.</p>
+<p>GTS was like a border guard with perfect memory and no interest in excuses. <a href="#ref-24" class="ref-link">REF-24</a></p>
+<p>It checked: Who is shipping? Who is receiving? What is the product? What is the HS code? Where is it going? Is anyone sanctioned? Does export control apply? Are documents complete?</p>
+<p>Daniel Fischer in Hamburg watched the compliance status. Daniel was logistics coordinator for Europe. He was tall, punctual, and emotionally damaged by late containers. He had a golden retriever named Otto and a girlfriend named Clara who often said:</p>
+<p class="dialogue">"You talk about vessels in your sleep."</p>
+<p>Daniel always denied it, although once he had murmured "ETA Rotterdam" during a movie.</p>
+<p>He checked the shipment. GTS released it. Daniel whispered, "Danke."</p>
+<p>Customs had not ruined the week. Yet.</p>
+
+<h2 class="act" id="act13"><span class="num">Act 13</span>The Export Picking Opera</h2>
+<p>Bangalore export warehouse received the outbound delivery. Manhattan WMS generated a wave. <a href="#ref-25" class="ref-link">REF-25</a></p>
+<p>A wave is what warehouse systems call organized chaos.</p>
+<p>Pick this. From there. In this sequence. Pack like this. Load there. Do not be creative.</p>
+<p>Karthik gathered the team.</p>
+<p class="dialogue">"Forty-two thousand units. Germany shipment. No shortage. No wrong batch. No mystery pallets. If a label is missing, you do not guess. You stop."</p>
+<p>The team picked cartons. Scanned pallets. Built export loads. Printed labels. Prepared documentation.</p>
+<p>Manhattan sent pick and pack confirmation back to SAP. <a href="#ref-26" class="ref-link">REF-26</a></p>
+<p>SAP was now ready for goods issue.</p>
+<p>The truck arrived. Karthik watched the container being loaded. He touched the side of one pallet, not sentimentally, but like a man checking that reality had weight.</p>
+<p class="dialogue">"Go safely," he said.</p>
+<p>The operator beside him grinned. "Sir, they are circuit breakers."</p>
+<p>Karthik replied, "Everything has a journey."</p>
+
+<h2 class="act" id="act14"><span class="num">Act 14</span>The Container Leaves India</h2>
+<p>The goods left Bangalore by road toward Chennai Port. Daniel's TMS tracked the route. <a href="#ref-27" class="ref-link">REF-27</a></p>
+<p>Freight order: <span style="font-family:monospace">FO-982771</span>. Carrier: Maersk. Container: <span style="font-family:monospace">MSKU-7729910</span>.</p>
+<p>Route: Bangalore to Chennai. Chennai to Rotterdam. Rotterdam to Hamburg.</p>
+<p>SAP posted goods issue from India. <a href="#ref-28" class="ref-link">REF-28</a></p>
+<p>Stock reduced in the Indian plant. The shipment was now in transit. Accounting and logistics ownership moved according to the intercompany design.</p>
+<p>Nisha saw the posting.</p>
+<p class="dialogue">"Hmm."</p>
+<p>Her colleague asked, "Good hmm or bad hmm?"</p>
+<p class="dialogue">"There is no good hmm in finance. Only pending investigation."</p>
+<p>The container moved. At Chennai port, it waited. Because ports are where time goes to smoke.</p>
+<p>Daniel checked the carrier portal. Status: <em>Loaded on vessel.</em> He relaxed slightly. Then he saw: <em>Estimated arrival Rotterdam delayed by one day.</em> He stopped relaxing.</p>
+<p>He called the carrier. The carrier said, "Operational reasons."</p>
+<p>Daniel closed his eyes. "Operational reasons" was logistics poetry for "do not ask us what happened."</p>
+
+<h2 class="act" id="act15"><span class="num">Act 15</span>Berlin Asks the Question Every Supply Chain Fears</h2>
+<p>Markus emailed Anna.</p>
+<p class="dialogue">"Are we still on track?"</p>
+<p>Anna opened Salesforce. The customer-facing shipment status showed in transit. <a href="#ref-29" class="ref-link">REF-29</a></p>
+<p>She checked with Daniel.</p>
+<p class="dialogue">Anna: Markus is asking.<br>
+Daniel: Of course Markus is asking.<br>
+Anna: Are we on track?<br>
+Daniel: Depends on your definition of emotional stability.<br>
+Anna: Daniel.<br>
+Daniel: Yes. Still on track. ETA Hamburg July 22. Customer delivery before July 25 remains possible.</p>
+<p>Anna replied to Markus:</p>
+<p class="dialogue">"Dear Markus, shipment is progressing as planned. We remain on track for delivery before July 25."</p>
+<p>She did not mention Rotterdam. She did not mention Daniel's blood pressure. She did not mention that somewhere on the ocean, 42,000 circuit breakers had become the emotional center of several adults' week.</p>
+<p>Markus replied:</p>
+<p class="dialogue">"Good."</p>
+<p>Anna looked at the email. Customers had a talent for using one syllable to erase twenty people's effort.</p>
+
+<h2 class="act" id="act16"><span class="num">Act 16</span>Hamburg, Efficiently Cloudy</h2>
+<p>The container arrived in Hamburg. The sky was grey in a disciplined German way.</p>
+<p>At Hamburg DC, the warehouse team received the goods. Manhattan had already received advance shipment information. <a href="#ref-30" class="ref-link">REF-30</a></p>
+<p>The team scanned pallets. Received. Checked. Put away.</p>
+<p>SAP posted goods receipt into the German plant. <a href="#ref-31" class="ref-link">REF-31</a></p>
+<p>Hamburg stock before: 8,000. Hamburg stock after: 50,000.</p>
+<p>Daniel messaged Anna.</p>
+<p class="dialogue">Daniel: Stock received in Hamburg.<br>
+Anna: I could kiss you.<br>
+Daniel: Please don't. HR exists.<br>
+Anna: Metaphorically.<br>
+Daniel: Acceptable.</p>
+<p>Anna messaged Markus.</p>
+<p class="dialogue">"Goods are in Germany. Delivery to Berlin scheduled."</p>
+<p>Markus responded:</p>
+<p class="dialogue">"Excellent."</p>
+<p>Anna stared at the word. <em>Excellent.</em></p>
+<p>After weeks of pressure, planning, procurement, production, inspection, warehousing, customs, transportation, and financial postings, the customer had upgraded from "Good" to "Excellent."</p>
+<p>Anna took it as a victory.</p>
+
+<h2 class="act" id="act17"><span class="num">Act 17</span>The Final Delivery to Berlin</h2>
+<p>SAP created the customer outbound delivery from Hamburg to VoltHaus Berlin DC. <a href="#ref-32" class="ref-link">REF-32</a></p>
+<p>Manhattan WMS received the delivery. Pick wave created. Warehouse tasks assigned. Pallets selected. FIFO respected. Batch allocation checked.</p>
+<p>A Hamburg picker named Greta looked at the task list.</p>
+<p class="dialogue">"Dock D7 again?"</p>
+<p>Her colleague said, "The system loves D7."</p>
+<p>Greta said, "The system has never walked there."</p>
+<p>She picked anyway. The goods were packed, staged, loaded.</p>
+<p>Manhattan confirmed picking and packing to SAP. <a href="#ref-33" class="ref-link">REF-33</a></p>
+<p>SAP posted final goods issue to the customer. <a href="#ref-34" class="ref-link">REF-34</a></p>
+<p>The goods left ElectraGrid stock. Finance recognized cost. The truck departed for Berlin.</p>
+<p>At VoltHaus, Markus watched the receiving team unload the pallets. Fifty thousand circuit breakers. Small white devices. Individually boring. Collectively impressive.</p>
+<p>Markus checked the delivery note. On time.</p>
+<p>He sent Anna an email:</p>
+<p class="dialogue">"Delivery received. Thank you."</p>
+<p>Anna read it twice. Then she forwarded it to Ravi, Priya, Arjun, Daniel, and Lukas with the subject: <strong>"VoltHaus delivered."</strong></p>
+<p class="dialogue">Ravi: Planning survives.<br>
+Priya: Production completed.<br>
+Arjun: Suppliers behaved. Suspicious.<br>
+Daniel: Logistics miracle, modestly speaking.<br>
+Lukas: Waiting for complaint.</p>
+<p>Everyone laughed. Then Lukas received a new case.</p>
+
+<h2 class="act" id="act18"><span class="num">Act 18</span>Because No Delivery Is Complete Without a Complaint</h2>
+<p>VoltHaus reported 200 damaged cartons. Not damaged products. Damaged cartons.</p>
+<p>But damaged cartons mattered. Customers see packaging before products. And customers, like auditors, are trained to notice the one thing you hoped they would not.</p>
+<p>Markus wrote:</p>
+<p class="dialogue">"Anna, delivery was on time, but 200 cartons are damaged. Please advise."</p>
+<p>Anna forwarded the email to Lukas Schneider. Lukas worked in customer service. He was German-Swiss, polite under pressure, and had mastered the art of writing "I understand your concern" while privately understanding only that someone else had caused him paperwork.</p>
+<p>He lived in Munich with his partner Elise, a violinist, who said customer service had made him "emotionally waterproof."</p>
+<p>Lukas opened Salesforce Service Cloud and created a case. <a href="#ref-35" class="ref-link">REF-35</a></p>
+<p>Case: Damaged cartons. Customer: VoltHaus. Related order: <span style="font-family:monospace">5000123456</span>. Severity: Medium.</p>
+<p>He called Markus.</p>
+<p class="dialogue">"Markus, I'm sorry about the damaged cartons. Are the products affected?"<br>
+"No. Products are fine. But carton damage is not acceptable for our campaign."<br>
+"I understand. We can send replacement cartons or issue a credit."<br>
+"Send replacement cartons."<br>
+"Done."</p>
+<p>Lukas then created the necessary follow-up process. Depending on the business decision, SAP could create a replacement delivery, credit memo, return, or quality notification. <a href="#ref-36" class="ref-link">REF-36</a></p>
+<p>Quality wanted photos. Warehouse wanted pallet IDs. TMS wanted carrier handling details. Packaging engineering wanted carton compression data. Finance wanted to know the cost. Sales wanted to know whether Markus was still happy.</p>
+<p>Lukas updated the case. Status: In progress.</p>
+<p>He messaged Anna.</p>
+<p class="dialogue">Lukas: Customer wants replacement cartons.<br>
+Anna: Will this affect account health?<br>
+Lukas: Not if we fix it fast.<br>
+Anna: Please fix it fast.<br>
+Lukas: That is literally the department name in spirit.</p>
+
+<h2 class="act" id="act19"><span class="num">Act 19</span>The Meeting Where Everyone Learned Nothing and Everything</h2>
+<p>One week later, Elena Rossi, Supply Chain Director, called a review meeting. Elena was Italian, based in Paris, and had the kind of executive presence that made people sit straighter before she spoke.</p>
+<p>She had built her career in factories, warehouses, planning offices, and boardrooms. She could discuss margin, container delays, supplier capacity, and defective pallets without changing facial expression.</p>
+<p>Her teenage daughter once asked what she did at work. Elena replied: "I ask why." That was accurate.</p>
+<p>On the video call: Anna from Sales. Ravi from Planning. Priya from Production. Arjun from Procurement. Karthik from Warehouse. Sunita from Quality. Daniel from Logistics. Nisha from Finance. Lukas from Customer Service. Omar from Integration.</p>
+<p>Elena opened the dashboard. <a href="#ref-37" class="ref-link">REF-37</a></p>
+<p>Order value: 300,000 euros. Delivered: 50,000 units. On-time: Yes. In-full: Yes. Production scrap: 300. Damaged cartons: 200. Gross margin: Healthy. Customer complaint: Open, controlled.</p>
+<p>Elena said, "Good delivery. Now tell me what nearly failed."</p>
+<p>Silence. Then everyone spoke at once.</p>
+<p class="dialogue">Anna: Availability was tight.<br>
+Ravi: Forecast did not include the campaign early enough.<br>
+Priya: Component shortage compressed production.<br>
+Arjun: Supplier lead times were optimistic.<br>
+Karthik: Export staging was too close to deadline.<br>
+Sunita: Copper passed, but supplier documentation needs improvement.<br>
+Daniel: Transport had one-day delay risk.<br>
+Nisha: Intercompany postings need cleaner reference text.<br>
+Lukas: Carton damage affected customer experience.<br>
+Omar: Salesforce-to-SAP mapping worked, but shipment status integration needs better error alerts.</p>
+<p>Elena listened. Then she said:</p>
+<p class="dialogue">"So the delivery succeeded because people manually protected the process from its weak points."</p>
+<p>Nobody objected. That was often how companies worked. Systems created structure. People created rescue.</p>
+<p>Elena assigned actions. Sales must enter large opportunities earlier. Planning must improve demand visibility. Procurement must confirm supplier capacity more rigorously. Packaging must review carton strength. Warehouse must improve pallet protection. Logistics must add exception alerts. Integration must improve status monitoring.</p>
+<p>Then Elena said:</p>
+<p class="dialogue">"Good work. The customer got the goods. Now make it less heroic next time."</p>
+<p>That sentence stayed with Ravi. <em>Make it less heroic.</em> That, he thought, was the real goal of enterprise systems. Not to eliminate humans. Not to make work magical. But to make ordinary success less dependent on panic, favors, memory, and caffeine.</p>
+
+<h2 class="act" id="act20"><span class="num">Act 20</span>After the Storm</h2>
+<p>A few days later, Anna visited Berlin's VoltHaus office. Markus met her in reception.</p>
+<p class="dialogue">"The campaign is going well," he said. "Installers like the product."<br>
+"I'm glad."<br>
+"The damaged cartons were handled quickly."<br>
+"Good."</p>
+<p>Markus hesitated.</p>
+<p class="dialogue">"We may need another 30,000 next quarter."</p>
+<p>Anna's smile froze for half a second. Then returned.</p>
+<p class="dialogue">"That sounds like a strategic opportunity."</p>
+<p>Markus sighed. "Please don't start."</p>
+<p>Meanwhile, in Bangalore, Ravi saw the new forecast note and laughed so hard Priya looked over.</p>
+<p class="dialogue">"What?"<br>
+"Germany may need more."<br>
+"Enter it early."<br>
+"I will."<br>
+"Not emotionally early. System early."</p>
+<p>Arjun received a message about possible future demand. He forwarded it to suppliers with the subject: <em>"Capacity Check - Not Urgent Yet But Will Become Urgent If You Ignore This."</em></p>
+<p>Karthik reviewed pallet protection standards. Sunita updated inspection instructions. Daniel added a transport risk alert. Nisha improved reference rules for intercompany postings. Omar added monitoring for shipment status messages. Lukas closed the damaged carton case.</p>
+<p>Salesforce marked the customer relationship healthy. SAP held the official documents. Manhattan knew where the replacement cartons had moved. MES remembered the production run. TMS remembered the vessel. GTS remembered the export. Analytics remembered the margin.</p>
+<p>And somewhere in Berlin, inside hundreds of residential electrical panels, ElectraGrid circuit breakers sat quietly in place. No drama. No emails. No dashboards.</p>
+<p>Just small white devices doing what they were made to do: protecting circuits. Which, after all the meetings, messages, documents, scans, postings, inspections, complaints, and reconciliations, was the whole point.</p>
+
+<h2 class="act" id="epilogue"><span class="num">Epilogue</span>What the Little Circuit Breaker Learned</h2>
+<p>If the circuit breaker could speak, perhaps it would say:</p>
+<p><em>"I was born from forecast and pressure. I was planned by anxious people. I was purchased through negotiation. I was inspected by suspicion. I was assembled by machines. I was moved by scanners. I crossed borders under paperwork. I was sold through relationships. I was billed into accounting. I became margin in a dashboard. I caused one complaint about cartons. And still, I reached Germany."</em></p>
+<p>But circuit breakers do not speak. Systems do.</p>
+<p class="dialogue"><strong>SAP says:</strong> "I recorded the truth."<br>
+<strong>Salesforce says:</strong> "I managed the relationship."<br>
+<strong>Manhattan says:</strong> "I knew the physical reality."<br>
+<strong>MES says:</strong> "I saw the factory floor."<br>
+<strong>TMS says:</strong> "I moved the shipment."<br>
+<strong>GTS says:</strong> "I allowed it across borders."<br>
+<strong>Middleware says:</strong> "I kept them talking, and nobody thanked me enough."</p>
+<p>And the humans? The humans went home.</p>
+<p>Anna fed Herr Mozart. Ravi helped Meera with homework. Priya endured Vihaan's guitar practice. Arjun argued with a wedding caterer. Karthik checked cake deliveries for Lakshmi. Sunita had tea with her father. Daniel walked Otto. Nisha explained to her brother, again, that AI would not clear his rent. Omar watered his bonsai. Lukas attended Elise's concert. Elena made pasta and did not check email for forty-three minutes.</p>
+<p>The enterprise rested. Briefly.</p>
+<p>Because somewhere, in another city, another customer was about to say:</p>
+<p class="dialogue">"Can you deliver before month-end?"</p>
+
+</section>
+
+<!-- REFERENCES -->
+<section class="references" id="references">
+  <h2>Technical References</h2>
+  <p class="intro">Each reference explains the system, document, and functional context behind a moment in the story. Click any <span style="background:var(--accent-soft);color:var(--accent);padding:1px 8px;border-radius:10px;font-size:12px;font-weight:bold;font-family:sans-serif;border:1px solid #e6c8c8;">REF</span> badge in the story to jump here.</p>
+
+  <article class="ref" id="ref-01">
+    <h3><span class="tag">REF-01</span> Salesforce Opportunity <a class="back-link" href="#act1">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Anna creates the VoltHaus opportunity in Salesforce.</div>
+    <div class="field"><span class="field-label">System</span>Salesforce Sales Cloud</div>
+    <div class="field"><span class="field-label">Functional Meaning</span>Before a real ERP order exists, sales teams track potential business in CRM. An opportunity is a commercial signal, not yet an operational commitment.</div>
+    <div class="field"><span class="field-label">Typical CRM Objects</span>
+      <ul><li>Account</li><li>Contact</li><li>Opportunity</li><li>Opportunity Product</li><li>Quote</li></ul>
+    </div>
+    <div class="field"><span class="field-label">SAP Impact</span>Usually no SAP sales order yet. May integrate customer, product, pricing, or availability checks with SAP.</div>
+    <div class="deep">An opportunity helps sales capture who the customer is, what they may buy, expected value, probability, and timing - before SAP needs to reserve stock or trigger execution.</div>
+    <div class="risk"><strong>What could go wrong?</strong> The opportunity may contain incomplete customer, material, quantity, or delivery information, which later causes incorrect quotes or failed integration. A functional consultant would define mandatory fields, validation rules, product mapping, and qualification checkpoints so only meaningful opportunities move toward order creation.</div>
+  </article>
+
+  <article class="ref" id="ref-02">
+    <h3><span class="tag">REF-02</span> Opportunity Closed Won <a class="back-link" href="#act2">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Markus accepts the quote and Anna marks the opportunity Closed Won.</div>
+    <div class="field"><span class="field-label">System</span>Salesforce Sales Cloud</div>
+    <div class="field"><span class="field-label">Functional Meaning</span>The commercial conversation becomes confirmed business. The process usually needs to create or trigger an ERP document so logistics, finance, planning, and delivery can start working.</div>
+    <div class="field"><span class="field-label">Common Integration Tools</span>
+      <ul><li>SAP CPI</li><li>SAP PI/PO</li><li>MuleSoft / Boomi</li><li>Custom API layer</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Typical Message Content</span>Customer, Product, Quantity, Requested delivery date, Ship-to, Currency, Incoterms, Payment terms</div>
+    <div class="deep">Closed Won means the customer has accepted the commercial offer. At this point the business is ready to move from CRM intent to ERP execution.</div>
+    <div class="risk"><strong>What could go wrong?</strong> The CRM quote may not match SAP master data, pricing, units of measure, or partner roles, causing order creation failures or wrong commitments. A functional consultant would align CRM-to-SAP field mapping, define error handling, validate customer/material records, and agree which system owns pricing and terms.</div>
+  </article>
+
+  <article class="ref" id="ref-03">
+    <h3><span class="tag">REF-03</span> SAP Sales Order Created <a class="back-link" href="#act2">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>SAP creates sales order 5000123456.</div>
+    <div class="field"><span class="field-label">SAP Module</span>SD - Sales and Distribution</div>
+    <div class="field"><span class="field-label">Key Transactions</span>
+      <ul><li><code>VA01</code> - Create Sales Order</li><li><code>VA02</code> - Change Sales Order</li><li><code>VA03</code> - Display Sales Order</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>VBAK</code> - Sales order header</li><li><code>VBAP</code> - Sales order item</li><li><code>VBEP</code> - Schedule lines</li><li><code>VBPA</code> - Partner data</li><li><code>PRCD_ELEMENTS</code> - Pricing (S/4HANA)</li><li><code>VBFA</code> - Document flow</li></ul>
+    </div>
+    <div class="deep">The sales order is the official ERP demand document. It records sold-to party, ship-to party, materials, quantities, requested dates, pricing, taxes, delivery terms, and schedule lines used by all downstream processes.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Wrong sales area, partner, material, pricing, or requested date can create incorrect availability and billing outcomes. A functional consultant would review copy controls, incompletion procedures, pricing conditions, partner determination, and order validation rules.</div>
+  </article>
+
+  <article class="ref" id="ref-04">
+    <h3><span class="tag">REF-04</span> ATP / Availability Check <a class="back-link" href="#act3">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>SAP checks stock and finds only 8,000 units in Hamburg.</div>
+    <div class="field"><span class="field-label">SAP Function</span>ATP - Available-to-Promise</div>
+    <div class="field"><span class="field-label">Key Transactions</span>
+      <ul><li><code>CO09</code> - Availability overview</li><li><code>MD04</code> - Stock/requirements list</li><li><code>VA02/VA03</code> - Sales order availability view</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Relevant Data</span>Plant stock, Open sales orders, Open deliveries, Planned receipts, Production orders, Purchase orders, Safety stock, Checking rules</div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>VBEP</code> - Schedule lines</li><li><code>MARD</code> - Storage location stock</li><li><code>MARC</code> - Plant-level material planning data</li><li><code>MATDOC</code> - Material documents (S/4HANA)</li></ul>
+    </div>
+    <div class="deep">ATP compares demand against available supply using stock, receipts, requirements, and configuration rules. It determines whether the requested quantity can be confirmed on the requested date or whether alternatives must be proposed.</div>
+    <div class="risk"><strong>What could go wrong?</strong> ATP can overpromise or underpromise if checking rules, scope of check, stock categories, or plant selection are wrong. A functional consultant would review availability checking configuration, material master settings, schedule lines, and exception messages with planning and sales.</div>
+  </article>
+
+  <article class="ref" id="ref-05">
+    <h3><span class="tag">REF-05</span> MRP Run <a class="back-link" href="#act4">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Priya runs planning and SAP calculates component requirements.</div>
+    <div class="field"><span class="field-label">SAP Module</span>PP/MM Integration</div>
+    <div class="field"><span class="field-label">Key Transactions</span>
+      <ul><li><code>MD01N</code> - MRP Live (S/4HANA)</li><li><code>MD01</code> - Total planning</li><li><code>MD02</code> - Single-item multi-level planning</li><li><code>MD04</code> - Stock/requirements list</li><li><code>MD05</code> - MRP list</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>PLAF</code> - Planned orders</li><li><code>EBAN</code> - Purchase requisitions</li><li><code>MAST</code> - Material to BOM link</li><li><code>STKO/STPO</code> - BOM header/item</li><li><code>MARC</code> - Material planning data</li></ul>
+    </div>
+    <div class="deep">MRP translates demand into supply proposals by exploding the bill of material and checking stock, procurement lead times, lot sizes, safety stock, and planned receipts. It tells the organization what to make, what to buy, and when.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Incorrect BOMs, lead times, lot-sizing, MRP type, or planning parameters can generate too much, too little, or late supply. A functional consultant would validate material masters, BOM/routing data, planning calendars, MRP areas, and exception messages with production planning.</div>
+  </article>
+
+  <article class="ref" id="ref-06">
+    <h3><span class="tag">REF-06</span> Purchase Requisitions Created <a class="back-link" href="#act4">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Planning creates internal buying requests for copper contacts and German cartons.</div>
+    <div class="field"><span class="field-label">SAP Module</span>MM - Materials Management</div>
+    <div class="field"><span class="field-label">Key Transactions</span>
+      <ul><li><code>ME51N</code> - Create Purchase Requisition</li><li><code>ME52N</code> - Change Purchase Requisition</li><li><code>ME53N</code> - Display Purchase Requisition</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Table</span><code>EBAN</code> - Purchase requisition</div>
+    <div class="deep">A purchase requisition is an internal request that signals a material or service is needed. It does not bind the company to a supplier, but gives procurement the structured requirement, quantity, delivery date, plant, and account assignment needed to source the item.</div>
+    <div class="risk"><strong>What could go wrong?</strong> The requisition may have missing source of supply, wrong delivery date, incorrect account assignment, or duplicated demand. A functional consultant would review source determination, release strategy, MRP-generated PR settings, and requisition approval rules.</div>
+  </article>
+
+  <article class="ref" id="ref-07">
+    <h3><span class="tag">REF-07</span> Purchase Orders Created <a class="back-link" href="#act5">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Arjun converts purchase requisitions into purchase orders.</div>
+    <div class="field"><span class="field-label">SAP Module</span>MM Purchasing</div>
+    <div class="field"><span class="field-label">Key Transactions</span>
+      <ul><li><code>ME21N</code> - Create Purchase Order</li><li><code>ME22N</code> - Change Purchase Order</li><li><code>ME23N</code> - Display Purchase Order</li><li><code>ME28</code> - Release Purchase Order</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>EKKO</code> - Purchase order header</li><li><code>EKPO</code> - Purchase order item</li><li><code>EKET</code> - Schedule lines</li><li><code>EKBE</code> - Purchase order history</li></ul>
+    </div>
+    <div class="deep">A purchase order converts an internal requirement into an external commitment to a supplier. It defines what must be delivered, by when, at what price, under which terms, and provides the reference used for goods receipt and invoice matching.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Wrong price, supplier, delivery date, tax code, incoterms, or release status can delay supply or cause invoice disputes. A functional consultant would check purchasing info records, source lists, release strategy, message output, tolerances, and PO history.</div>
+  </article>
+
+  <article class="ref" id="ref-08">
+    <h3><span class="tag">REF-08</span> SAP Official Purchase Order Record <a class="back-link" href="#act5">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>SAP records the purchase orders officially.</div>
+    <div class="field"><span class="field-label">Functional Meaning</span>SAP becomes the official system of record for procurement commitment.</div>
+    <div class="field"><span class="field-label">Key Concepts</span>Vendor, Material, Plant, Quantity, Price, Delivery date, Payment terms, Incoterms</div>
+    <div class="field"><span class="field-label">Financial Note</span>PO creation itself may not post accounting. Accounting usually starts at goods receipt or invoice receipt.</div>
+    <div class="deep">Once SAP stores the PO, procurement has a controlled and auditable purchasing commitment. The PO becomes the reference point for supplier confirmation, inbound delivery, goods receipt, invoice verification, and spend reporting.</div>
+    <div class="risk"><strong>What could go wrong?</strong> If the PO is changed outside agreed controls, downstream confirmations and receipts may no longer match. A functional consultant would define change control, release reapproval, output management, and audit-relevant fields for procurement documents.</div>
+  </article>
+
+  <article class="ref" id="ref-09">
+    <h3><span class="tag">REF-09</span> SAP Ariba Supplier Collaboration <a class="back-link" href="#act5">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Ariba handles supplier communication and confirmations.</div>
+    <div class="field"><span class="field-label">System</span>SAP Ariba</div>
+    <div class="field"><span class="field-label">Common Use Cases</span>
+      <ul><li>Supplier quotation &amp; sourcing events</li><li>Contract management</li><li>Supplier PO confirmation</li><li>Advance shipment notice</li><li>Supplier invoice collaboration</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Relationship to SAP</span>SAP remains ERP system of record. Ariba manages the collaboration and sourcing experience.</div>
+    <div class="deep">Ariba extends procurement beyond internal SAP users by giving suppliers a collaboration channel for confirmations, ASNs, sourcing events, contract visibility, and communication - while SAP keeps official procurement and finance records.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Supplier confirmations in Ariba may not update SAP correctly, or supplier data may differ between systems. A functional consultant would verify integration mappings, supplier IDs, confirmation rules, Ariba Network settings, and exception monitoring.</div>
+  </article>
+
+  <article class="ref" id="ref-10">
+    <h3><span class="tag">REF-10</span> Manhattan WMS Receiving <a class="back-link" href="#act7">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Karthik's team scans incoming components in Manhattan WMS.</div>
+    <div class="field"><span class="field-label">System</span>Manhattan WMS</div>
+    <div class="field"><span class="field-label">Captures</span>Dock door, Pallet, Carton, Bin, Scanner user, Timestamp, Warehouse task, Putaway confirmation</div>
+    <div class="field"><span class="field-label">Why Not Only SAP?</span>SAP knows inventory at plant/storage-location level. WMS knows operational bin-level and task-level reality.</div>
+    <div class="deep">Manhattan WMS manages the physical warehouse work that ERP usually does not track in enough operational detail. It records exactly where goods were received, who scanned them, which tasks were created, and where the inventory should be put away.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Warehouse and SAP stock can diverge if receipts, bins, labels, or integration messages fail. A functional consultant would reconcile WMS and SAP inventory, define scan validations, monitor interface queues, and clarify which system owns each warehouse status.</div>
+  </article>
+
+  <article class="ref" id="ref-11">
+    <h3><span class="tag">REF-11</span> SAP Goods Receipt <a class="back-link" href="#act7">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>SAP posts official goods receipt for purchased components.</div>
+    <div class="field"><span class="field-label">SAP Transactions</span>
+      <ul><li><code>MIGO</code> - Goods movement / Goods receipt</li><li><code>MB03</code> - Display material document</li><li><code>MMBE</code> - Stock overview</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Movement Type</span><code>101</code> - Goods receipt for purchase order</div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>MATDOC</code> - Material document (S/4HANA)</li><li><code>MKPF / MSEG</code> - Material document header/item (ECC)</li><li><code>MARD</code> - Storage location stock</li><li><code>EKBE</code> - PO history</li></ul>
+    </div>
+    <div class="deep">Goods receipt is the official ERP confirmation that purchased material has arrived. It updates stock, PO history, and financial values, making the material available for quality inspection, production, or other processes depending on configuration.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Wrong quantity, movement type, batch, storage location, or PO reference can create stock and accounting errors. A functional consultant would review movement configuration, tolerance limits, quality inspection setup, reversal process, and GR/IR impact.</div>
+  </article>
+
+  <article class="ref" id="ref-12">
+    <h3><span class="tag">REF-12</span> Goods Receipt Accounting <a class="back-link" href="#act7">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Nisha senses the financial posting.</div>
+    <div class="field"><span class="field-label">Functional Meaning</span>For valuated materials, goods receipt creates accounting entries automatically.</div>
+    <div class="field"><span class="field-label">Typical Accounting Entry</span>
+      <ul><li>Debit - Inventory</li><li>Credit - GR/IR Clearing</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>BKPF</code> - Accounting document header</li><li><code>BSEG</code> - Accounting document line item (ECC)</li><li><code>ACDOCA</code> - Universal journal (S/4HANA)</li></ul>
+    </div>
+    <div class="deep">The goods receipt increases inventory value and credits GR/IR clearing so finance can later match the supplier invoice against the receipt and PO. Logistics movements often create finance postings automatically with no manual intervention.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Incorrect valuation class, account determination, price control, or exchange rate can post the wrong financial value. A functional consultant would review OBYC/account determination, material valuation, PO pricing, and GR/IR reconciliation.</div>
+  </article>
+
+  <article class="ref" id="ref-13">
+    <h3><span class="tag">REF-13</span> Inspection Lot <a class="back-link" href="#act8">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Sunita checks the inspection lot for copper contacts.</div>
+    <div class="field"><span class="field-label">SAP Module</span>QM - Quality Management</div>
+    <div class="field"><span class="field-label">Key Transactions</span>
+      <ul><li><code>QA32</code> - Inspection lot worklist</li><li><code>QA03</code> - Display inspection lot</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>QALS</code> - Inspection lot</li><li><code>QAMV</code> - Inspection characteristics</li></ul>
+    </div>
+    <div class="deep">An inspection lot groups the quality activities required for a material receipt or production event. It defines what must be inspected, which characteristics apply, how results are recorded, and whether stock remains blocked from normal use until a decision is made.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Inspection lots may not create if inspection types, quality info records, or material master QM views are wrong. A functional consultant would validate QM master data, inspection plan assignment, inspection type activation, and stock posting settings.</div>
+  </article>
+
+  <article class="ref" id="ref-14">
+    <h3><span class="tag">REF-14</span> Results Recording and Usage Decision <a class="back-link" href="#act8">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Sunita records inspection results and accepts the material.</div>
+    <div class="field"><span class="field-label">SAP Transactions</span>
+      <ul><li><code>QE51N</code> - Results recording</li><li><code>QA11</code> - Usage decision</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>QAMR</code> - Inspection results</li><li><code>QASE</code> - Sample results</li><li><code>QAVE</code> - Usage decision</li></ul>
+    </div>
+    <div class="deep">Results recording captures measured quality values, while the usage decision decides whether the material is accepted, rejected, or handled conditionally. This step turns inspection evidence into a business decision that controls stock usability.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Users may record incomplete results, choose the wrong usage decision code, or release defective material. A functional consultant would configure mandatory characteristics, selected sets, UD codes, authorization controls, and defect follow-up actions.</div>
+  </article>
+
+  <article class="ref" id="ref-15">
+    <h3><span class="tag">REF-15</span> Quality Stock to Unrestricted Stock <a class="back-link" href="#act8">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Copper moves from inspection stock to usable stock.</div>
+    <div class="field"><span class="field-label">Movement Type</span><code>321</code> - Quality inspection stock to unrestricted stock</div>
+    <div class="field"><span class="field-label">Related Stock Categories</span>
+      <ul><li>Unrestricted-use stock</li><li>Quality inspection stock</li><li>Blocked stock</li></ul>
+    </div>
+    <div class="deep">After quality acceptance, stock moves from inspection to unrestricted use so planning, production, or sales can consume it. Material may physically exist in the warehouse but remain unavailable until this status change occurs.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Stock may remain stuck in inspection, move to the wrong status, or be released before required checks are complete. A functional consultant would review usage decision posting proposals, movement type 321 behaviour, authorizations, and stock reports.</div>
+  </article>
+
+  <article class="ref" id="ref-16">
+    <h3><span class="tag">REF-16</span> Production Order Created <a class="back-link" href="#act9">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Priya converts the planned order into a production order.</div>
+    <div class="field"><span class="field-label">SAP Module</span>PP - Production Planning</div>
+    <div class="field"><span class="field-label">Key Transactions</span>
+      <ul><li><code>CO40</code> - Convert planned order to production order</li><li><code>CO01</code> - Create production order</li><li><code>CO02</code> - Change production order</li><li><code>CO03</code> - Display production order</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>AUFK</code> - Order master</li><li><code>AFKO</code> - Production order header</li><li><code>AFPO</code> - Production order item</li><li><code>AFVC</code> - Operations</li><li><code>RESB</code> - Components/reservations</li></ul>
+    </div>
+    <div class="deep">The production order is the formal manufacturing instruction for a specific finished product quantity. It carries the BOM components, routing operations, dates, work centers, reservations, costing objects, and confirmation structure needed by the shop floor.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Wrong BOM, routing, work center, order type, or dates can make production infeasible or incorrectly costed. A functional consultant would validate master data selection, order type parameters, scheduling, component reservations, and costing variants.</div>
+  </article>
+
+  <article class="ref" id="ref-17">
+    <h3><span class="tag">REF-17</span> Production Order Released <a class="back-link" href="#act9">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Priya releases the production order.</div>
+    <div class="field"><span class="field-label">Functional Meaning</span>The order can now be executed on the shop floor. Before release it is intention; after release it is permission.</div>
+    <div class="field"><span class="field-label">Common Order Statuses</span>
+      <ul><li><code>CRTD</code> - Created</li><li><code>REL</code> - Released</li><li><code>PCNF</code> - Partially confirmed</li><li><code>CNF</code> - Confirmed</li><li><code>DLV</code> - Delivered</li><li><code>TECO</code> - Technically completed</li><li><code>CLSD</code> - Closed</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Status Tables</span><code>JEST</code> - Object status &nbsp;|&nbsp; <code>TJ02T</code> - System status text &nbsp;|&nbsp; <code>TJ30T</code> - User status text</div>
+    <div class="deep">Releasing a production order changes it from a plan into executable work. It allows material issue, shop-floor execution, confirmations, and integration with MES or warehouse processes depending on plant design.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Orders may be released without components, capacity, quality checks, or approvals. A functional consultant would configure release checks, status profiles, missing parts checks, availability checks, and authorization controls.</div>
+  </article>
+
+  <article class="ref" id="ref-18">
+    <h3><span class="tag">REF-18</span> MES Integration <a class="back-link" href="#act9">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>The production order goes to MES.</div>
+    <div class="field"><span class="field-label">System</span>Manufacturing Execution System (MES)</div>
+    <div class="field"><span class="field-label">MES Captures</span>Machine status, Operator login, Cycle time, Scrap, Rework, Defects, Serial/batch genealogy, Line stoppages, Operation confirmations</div>
+    <div class="field"><span class="field-label">SAP Relationship</span>SAP owns the official production order and inventory/finance postings. MES owns factory-floor execution detail.</div>
+    <div class="deep">MES receives production instructions from SAP and manages real-time execution on the manufacturing line. It captures operational detail such as machine events, operator actions, cycle times, defects, and confirmations that SAP needs in summarised or structured form.</div>
+    <div class="risk"><strong>What could go wrong?</strong> MES and SAP can disagree on order status, quantities, scrap, or component consumption if messages fail or mappings differ. A functional consultant would define integration timing, confirmation granularity, error queues, master data alignment, and reconciliation reports.</div>
+  </article>
+
+  <article class="ref" id="ref-19">
+    <h3><span class="tag">REF-19</span> Component Consumption <a class="back-link" href="#act9">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Raw materials are consumed for production.</div>
+    <div class="field"><span class="field-label">Movement Types</span>
+      <ul><li><code>261</code> - Goods issue to production order</li><li><code>262</code> - Reversal of goods issue</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Transactions</span><code>MIGO</code> - Goods issue &nbsp;|&nbsp; <code>CO11N / CO15</code> - Confirmation with possible backflush</div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>RESB</code> - Production order components</li><li><code>MATDOC</code> - Goods movements</li><li><code>ACDOCA</code> - Accounting/cost postings</li></ul>
+    </div>
+    <div class="deep">Component consumption records raw materials issued to the production order. It reduces component stock and charges the production order with material cost, either manually or through backflush during confirmation.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Consumption may be missed, duplicated, posted to the wrong order, or use the wrong batch. A functional consultant would review backflush indicators, reservation behaviour, batch determination, movement type 261 controls, and reversal process.</div>
+  </article>
+
+  <article class="ref" id="ref-20">
+    <h3><span class="tag">REF-20</span> Production Confirmation <a class="back-link" href="#act9">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>MES sends production results back to SAP.</div>
+    <div class="field"><span class="field-label">SAP Transactions</span>
+      <ul><li><code>CO11N</code> - Confirm operation/order</li><li><code>CO15</code> - Confirm production order</li><li><code>CO14</code> - Display confirmations</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>AFRU</code> - Confirmations</li><li><code>AFVC</code> - Operations</li><li><code>AFKO</code> - Order header</li><li><code>AUFK</code> - Order master</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Typical Confirmation Fields</span>Yield, Scrap, Rework, Labor time, Machine time, Operation status</div>
+    <div class="deep">Production confirmation records actual manufacturing progress and performance. It updates quantities, operation status, labour or machine time, scrap, rework, and may trigger automatic goods movements depending on configuration.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Incorrect confirmations can overstate yield, hide scrap, or post wrong labour and component consumption. A functional consultant would define confirmation parameters, tolerances, reason codes, rework handling, and MES-to-SAP validation.</div>
+  </article>
+
+  <article class="ref" id="ref-21">
+    <h3><span class="tag">REF-21</span> Finished Goods Receipt <a class="back-link" href="#act10">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>41,700 finished MCBs are received into stock.</div>
+    <div class="field"><span class="field-label">Movement Type</span><code>101</code> - Goods receipt from production order</div>
+    <div class="field"><span class="field-label">Key Transactions</span>
+      <ul><li><code>MIGO</code> - Goods receipt</li><li><code>CO11N / CO15</code> - Confirmation with automatic goods receipt</li><li><code>MMBE</code> - Stock overview</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>MATDOC</code> - Goods movement</li><li><code>AFPO</code> - Production order item</li><li><code>MARD</code> - Stock</li><li><code>ACDOCA</code> - Accounting</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Typical Accounting</span>
+      <ul><li>Debit - Finished Goods Inventory</li><li>Credit - Production Order</li></ul>
+    </div>
+    <div class="deep">Finished goods receipt brings the manufactured product into inventory. It increases finished goods stock, updates the production order, and posts accounting so the order cost is credited and inventory value is debited.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Wrong quantity, storage location, valuation, or order settlement status can distort inventory and costing. A functional consultant would review automatic goods receipt settings, order costing, movement type 101, storage determination, and settlement readiness.</div>
+  </article>
+
+  <article class="ref" id="ref-22">
+    <h3><span class="tag">REF-22</span> Stock Transfer Order / Intercompany Requirement <a class="back-link" href="#act11">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Germany creates a stock transfer request to India.</div>
+    <div class="field"><span class="field-label">Process Options</span>
+      <ul><li>Stock Transport Order (STO)</li><li>Intercompany sales</li><li>Intercompany billing</li><li>Cross-company-code stock transfer</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Transactions</span>
+      <ul><li><code>ME21N</code> - Create STO</li><li><code>ME22N</code> - Change STO</li><li><code>ME23N</code> - Display STO</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>EKKO</code> - STO/PO header</li><li><code>EKPO</code> - STO/PO item</li><li><code>EKET</code> - Schedule lines</li><li><code>EKBE</code> - History</li></ul>
+    </div>
+    <div class="deep">A stock transfer or intercompany process moves goods between plants, company codes, or legal entities. It is not just logistics - it may involve purchasing documents, deliveries, customs, transfer pricing, and intercompany billing.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Wrong supplying plant, receiving plant, company code, pricing, or tax setup can block shipment or create incorrect financial postings. A functional consultant would review STO configuration, intercompany pricing, plant assignments, delivery type, and billing relevance.</div>
+  </article>
+
+  <article class="ref" id="ref-23">
+    <h3><span class="tag">REF-23</span> Outbound Delivery for Intercompany / STO <a class="back-link" href="#act11">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>India prepares delivery to Hamburg DC.</div>
+    <div class="field"><span class="field-label">Key Transactions</span>
+      <ul><li><code>VL10B</code> - Create delivery due list for STO</li><li><code>VL01N</code> - Create outbound delivery</li><li><code>VL02N</code> - Change / post goods issue</li><li><code>VL03N</code> - Display delivery</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>LIKP</code> - Delivery header</li><li><code>LIPS</code> - Delivery item</li><li><code>VBFA</code> - Document flow</li></ul>
+    </div>
+    <div class="deep">The outbound delivery tells the supplying warehouse what must be picked, packed, and shipped for the stock transfer or intercompany movement. It connects the procurement/stock transfer requirement to actual logistics execution.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Delivery creation may fail because of missing shipping data, route, storage location, schedule line, or availability. A functional consultant would review delivery due list criteria, shipping point determination, route determination, picking relevance, and document flow.</div>
+  </article>
+
+  <article class="ref" id="ref-24">
+    <h3><span class="tag">REF-24</span> SAP GTS Compliance Check <a class="back-link" href="#act12">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Trade compliance checks the export shipment.</div>
+    <div class="field"><span class="field-label">System</span>SAP GTS or another global trade compliance system</div>
+    <div class="field"><span class="field-label">Checks Performed</span>
+      <ul><li>Denied party screening</li><li>Embargo verification</li><li>Export control classification</li><li>License requirement determination</li><li>HS code validation</li><li>Country of origin</li><li>Customs documentation completeness</li></ul>
+    </div>
+    <div class="field"><span class="field-label">SAP Relationship</span>SAP delivery can be blocked or released based on GTS result.</div>
+    <div class="deep">GTS checks whether the shipment is legally allowed to move across borders. It evaluates parties, countries, materials, classifications, licenses, and documents before export or import activity continues. A single blocked field can stop the entire shipment.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Shipments can be blocked due to missing HS codes, denied-party hits, expired licenses, or incomplete customs data. A functional consultant would coordinate product classification, business partner screening, license determination, and blocked-document resolution.</div>
+  </article>
+
+  <article class="ref" id="ref-25">
+    <h3><span class="tag">REF-25</span> WMS Pick Wave <a class="back-link" href="#act13">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Manhattan creates a warehouse wave for export picking.</div>
+    <div class="field"><span class="field-label">System</span>Manhattan WMS or SAP EWM</div>
+    <div class="field"><span class="field-label">Typical WMS Objects</span>
+      <ul><li>Wave</li><li>Pick task / Pack task</li><li>Pallet &amp; Carton</li><li>Handling unit</li><li>Dock appointment</li><li>Load task</li></ul>
+    </div>
+    <div class="deep">A pick wave groups warehouse work so teams can pick, pack, stage, and load efficiently. It turns delivery demand into executable warehouse tasks based on priorities, zones, labour, equipment, and shipment timing - removing the need for individual manual decisions on every carton.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Wave rules may create inefficient work, miss urgent deliveries, or assign stock from the wrong zone or batch. A functional consultant would review wave templates, allocation rules, task priorities, batch/FIFO rules, and exception handling.</div>
+  </article>
+
+  <article class="ref" id="ref-26">
+    <h3><span class="tag">REF-26</span> WMS Pick/Pack Confirmation to SAP <a class="back-link" href="#act13">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Manhattan confirms export picking and packing back to SAP.</div>
+    <div class="field"><span class="field-label">Possible Integration Methods</span>
+      <ul><li>IDoc</li><li>API / RFC</li><li>Middleware message</li><li>File/message queue depending on landscape</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key SAP Delivery Tables</span>
+      <ul><li><code>LIKP</code> - Delivery header</li><li><code>LIPS</code> - Delivery item</li><li><code>VEKP</code> - Handling unit header</li><li><code>VEPO</code> - Handling unit item</li></ul>
+    </div>
+    <div class="deep">After the warehouse physically picks and packs goods, WMS sends the completion details back to SAP. SAP then updates the delivery with picked quantity, handling units, packing status, and readiness for goods issue.</div>
+    <div class="risk"><strong>What could go wrong?</strong> SAP may not receive the confirmation, or received quantities and handling units may not match the delivery. A functional consultant would monitor interfaces, define tolerance and short-pick rules, validate handling unit mapping, and reconcile WMS/SAP statuses.</div>
+  </article>
+
+  <article class="ref" id="ref-27">
+    <h3><span class="tag">REF-27</span> TMS Transportation Planning <a class="back-link" href="#act14">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Daniel tracks the freight order and carrier movement.</div>
+    <div class="field"><span class="field-label">System</span>SAP TM, Oracle OTM, Blue Yonder, MercuryGate, or another TMS</div>
+    <div class="field"><span class="field-label">TMS Handles</span>
+      <ul><li>Carrier selection &amp; freight booking</li><li>Route planning</li><li>Freight cost calculation</li><li>Shipment tracking &amp; milestones</li><li>ETA management</li><li>Container/truck references</li></ul>
+    </div>
+    <div class="field"><span class="field-label">SAP Relationship</span>SAP owns delivery/inventory/billing. TMS owns transport execution detail.</div>
+    <div class="deep">TMS plans and tracks the physical movement after goods are ready to ship. It manages carrier selection, freight orders, routes, milestones, costs, and ETA updates that sales and logistics teams need for visibility - without burdening the ERP with every carrier event.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Carrier milestones may be late, freight cost may be wrong, or shipment status may not reach SAP/CRM. A functional consultant would review freight order integration, carrier event mapping, route master data, charge calculation, and exception alerts.</div>
+  </article>
+
+  <article class="ref" id="ref-28">
+    <h3><span class="tag">REF-28</span> Post Goods Issue from India <a class="back-link" href="#act14">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>SAP posts goods issue from the Indian plant.</div>
+    <div class="field"><span class="field-label">Movement Types</span>
+      <ul><li><code>641</code> - Goods issue for stock transport order</li><li><code>601</code> - Goods issue for sales delivery</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Transactions</span><code>VL02N</code> - Post Goods Issue &nbsp;|&nbsp; <code>VL09</code> - Reverse Goods Issue</div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>LIKP / LIPS</code> - Delivery header/item</li><li><code>MATDOC</code> - Goods movement</li><li><code>BKPF / ACDOCA</code> - Accounting</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Business Effect</span>Stock decreases, Accounting may post, Delivery status updates, Ownership/logistics status changes per process design</div>
+    <div class="deep">Posting goods issue confirms that goods have physically and legally left the supplying location. It reduces stock, updates delivery status, may trigger accounting, and marks the key ownership or logistics milestone for the intercompany movement.</div>
+    <div class="risk"><strong>What could go wrong?</strong> PGI may be posted too early, with wrong quantity, wrong batch, or missing export readiness. A functional consultant would define PGI controls, delivery blocks, reversal procedures, batch checks, and compliance/warehouse prerequisites.</div>
+  </article>
+
+  <article class="ref" id="ref-29">
+    <h3><span class="tag">REF-29</span> Shipment Status Visibility in Salesforce <a class="back-link" href="#act15">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Anna checks the customer-facing shipment status.</div>
+    <div class="field"><span class="field-label">Possible Sources</span>
+      <ul><li>SAP delivery status</li><li>TMS milestone events</li><li>Carrier tracking feed</li><li>WMS dispatch confirmation</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Integration</span>SAP/TMS/carrier data can be synchronised to Salesforce via middleware, APIs, or connector apps.</div>
+    <div class="deep">Salesforce shipment visibility gives customer-facing teams a readable view of logistics progress without making them work directly in SAP, WMS, TMS, or carrier portals. It helps sales and service answer customer questions using near-real-time operational data.</div>
+    <div class="risk"><strong>What could go wrong?</strong> CRM may show stale, oversimplified, or misleading shipment status if integrations fail or milestones are mapped poorly. A functional consultant would define customer-facing status logic, refresh frequency, source priority, and alert rules for delayed updates.</div>
+  </article>
+
+  <article class="ref" id="ref-30">
+    <h3><span class="tag">REF-30</span> ASN to WMS <a class="back-link" href="#act16">back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Hamburg WMS receives advance shipment information.</div>
+    <div class="field"><span class="field-label">Functional Meaning</span>Advance Shipment Notice (ASN) tells the receiving warehouse what is coming before the truck arrives.</div>
+    <div class="field"><span class="field-label">ASN Can Include</span>
+      <ul><li>Shipment number &amp; container reference</li><li>Pallets, cartons, materials, quantities</li><li>Batch numbers</li><li>Expected arrival date/time</li></ul>
+    </div>
+    <div class="deep">An ASN prepares the receiving warehouse before the truck or container arrives. It tells WMS what to expect so receiving, dock scheduling, scanning, and putaway can happen faster and with fewer manual checks - turning unloading into a planned event rather than a surprise.</div>
+    <div class="risk"><strong>What could go wrong?</strong> ASN quantities, pallet IDs, materials, or arrival dates may differ from the physical shipment. A functional consultant would define ASN validation, discrepancy handling, barcode standards, inbound delivery linkage, and supplier/carrier correction processes.</div>
+  </article>
+
+  <article class="ref" id="ref-31">
+    <h3><span class="tag">REF-31</span> Goods Receipt in Germany <a class="back-link" href="#act16">&#8593; back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Hamburg receives stock into plant DEH1.</div>
+    <div class="field"><span class="field-label">Key Transactions</span>
+      <ul><li><code>MIGO</code> — Goods receipt</li><li><code>MMBE</code> — Stock overview</li><li><code>MB03</code> — Display material document</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Movement Type</span><code>101</code> — Goods receipt for STO/purchase order</div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>MATDOC</code> — Material movement</li><li><code>MARD</code> — Storage location stock</li><li><code>EKBE</code> — STO/PO history</li><li><code>BKPF / ACDOCA</code> — Accounting</li></ul>
+    </div>
+    <div class="deep">Goods receipt in Germany confirms that transferred goods have arrived at the receiving plant. It increases German stock, updates the STO or intercompany history, and may complete logistics or accounting steps depending on the process design.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Receiving may post against the wrong STO, quantity, batch, storage location, or company code. A functional consultant would review inbound delivery processing, movement type, valuation, discrepancy handling, and intercompany reconciliation.</div>
+  </article>
+
+  <article class="ref" id="ref-32">
+    <h3><span class="tag">REF-32</span> Customer Outbound Delivery <a class="back-link" href="#act17">&#8593; back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>SAP creates delivery from Hamburg to VoltHaus Berlin DC.</div>
+    <div class="field"><span class="field-label">SAP Transactions</span>
+      <ul><li><code>VL01N</code> — Create outbound delivery</li><li><code>VL10A</code> — Delivery due list</li><li><code>VL02N</code> — Change delivery / PGI</li><li><code>VL03N</code> — Display delivery</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>LIKP</code> — Delivery header</li><li><code>LIPS</code> — Delivery item</li><li><code>VBFA</code> — Document flow</li></ul>
+    </div>
+    <div class="deep">The customer outbound delivery converts the sales order requirement into warehouse execution for the final customer shipment. It controls picking, packing, route, shipping point, delivery quantity, and the final PGI step that transfers ownership to the customer.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Delivery may not create because of credit blocks, incomplete order data, delivery blocks, unavailable stock, or wrong shipping setup. A functional consultant would review order status, delivery due list, shipping point determination, route, picking relevance, and block reasons.</div>
+  </article>
+
+  <article class="ref" id="ref-33">
+    <h3><span class="tag">REF-33</span> WMS Confirms Customer Pick/Pack <a class="back-link" href="#act17">&#8593; back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Manhattan confirms picking and packing for the final customer delivery.</div>
+    <div class="field"><span class="field-label">WMS Confirms</span>
+      <ul><li>Picked quantity</li><li>Packed quantity</li><li>Pallet/carton IDs</li><li>Batch/serial if relevant</li><li>Loading status</li><li>Shortages/exceptions</li></ul>
+    </div>
+    <div class="deep">The final customer pick/pack confirmation proves the warehouse has completed physical preparation for customer shipment. It updates SAP so the ERP delivery reflects actual warehouse execution before goods issue is posted.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Short picks, damaged cartons, missing labels, or interface failures can prevent accurate PGI. A functional consultant would review exception codes, handling unit requirements, batch/serial validation, WMS task closure, and SAP delivery status mapping.</div>
+  </article>
+
+  <article class="ref" id="ref-34">
+    <h3><span class="tag">REF-34</span> Post Goods Issue to Customer <a class="back-link" href="#act17">&#8593; back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>SAP posts final PGI for the VoltHaus delivery.</div>
+    <div class="field"><span class="field-label">Movement Type</span><code>601</code> — Goods issue for sales delivery</div>
+    <div class="field"><span class="field-label">Key Transaction</span><code>VL02N</code> — Post Goods Issue</div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>MATDOC</code> — Goods movement</li><li><code>LIKP / LIPS</code> — Delivery</li><li><code>BKPF / ACDOCA</code> — Accounting</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Typical Accounting</span>
+      <ul><li>Debit — Cost of Goods Sold</li><li>Credit — Finished Goods Inventory</li></ul>
+    </div>
+    <div class="deep">PGI to the customer is the point where goods leave company inventory for the sales delivery. It reduces stock, updates the delivery and sales document flow, and posts cost of goods sold for financial reporting — the moment the product officially becomes the customer's.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Posting goods issue with wrong quantity, batch, or valuation can distort inventory, COGS, and customer delivery status. A functional consultant would review PGI authorization, delivery completeness, reversal process, account determination, and billing dependencies.</div>
+  </article>
+
+  <article class="ref" id="ref-35">
+    <h3><span class="tag">REF-35</span> Salesforce Service Case <a class="back-link" href="#act18">&#8593; back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Lukas creates a damaged carton case in Salesforce Service Cloud.</div>
+    <div class="field"><span class="field-label">System</span>Salesforce Service Cloud</div>
+    <div class="field"><span class="field-label">Typical Objects</span>
+      <ul><li>Case</li><li>Account &amp; Contact</li><li>Entitlement / SLA</li><li>Case comments &amp; attachments</li><li>Related order/delivery references</li></ul>
+    </div>
+    <div class="deep">A Salesforce service case captures the customer complaint and organises communication, ownership, SLA, evidence, and resolution steps. It gives customer service a structured place to manage the issue without losing context from the original sale and delivery.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Cases may lack order references, photos, severity, entitlement, or correct assignment, slowing resolution. A functional consultant would define case fields, routing rules, SLA logic, required evidence, and integration links back to SAP documents.</div>
+  </article>
+
+  <article class="ref" id="ref-36">
+    <h3><span class="tag">REF-36</span> SAP Follow-Up for Complaint <a class="back-link" href="#act18">&#8593; back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>SAP may create replacement, credit, return, or quality notification.</div>
+    <div class="field"><span class="field-label">Possible SAP Follow-Ups</span>
+      <ul><li>Return order</li><li>Credit memo request</li><li>Replacement / free-of-charge delivery</li><li>Quality notification</li><li>Debit/credit memo</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Transactions</span>
+      <ul><li><code>VA01</code> — Create return order/credit memo request</li><li><code>VL01N</code> — Create return/replacement delivery</li><li><code>VF01</code> — Create credit memo billing</li><li><code>QM01</code> — Create quality notification</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key Tables</span>
+      <ul><li><code>VBAK / VBAP</code> — Sales document</li><li><code>VBRK / VBRP</code> — Billing document</li><li><code>QMEL</code> — Quality notification</li><li><code>VBFA</code> — Document flow</li></ul>
+    </div>
+    <div class="deep">A customer complaint may require an ERP follow-up because service resolution can affect inventory, billing, quality, and finance. SAP follow-up documents ensure the business action is controlled, auditable, and connected to the original order flow.</div>
+    <div class="risk"><strong>What could go wrong?</strong> The wrong follow-up type can create unnecessary returns, credits, replacements, or quality work. A functional consultant would guide the decision matrix, configure document types, copy controls, reason codes, approval steps, and document flow.</div>
+  </article>
+
+  <article class="ref" id="ref-37">
+    <h3><span class="tag">REF-37</span> Analytics Dashboard <a class="back-link" href="#act19">&#8593; back to story</a></h3>
+    <div class="field"><span class="field-label">Story Moment</span>Elena reviews the supply chain performance dashboard.</div>
+    <div class="field"><span class="field-label">Systems</span>SAP Analytics Cloud · SAP BW · SAP Datasphere · Power BI / Tableau · Data lake/warehouse</div>
+    <div class="field"><span class="field-label">Possible Data Sources</span>
+      <ul><li>SAP S/4HANA</li><li>Salesforce</li><li>Manhattan WMS</li><li>MES</li><li>TMS</li><li>GTS</li><li>Carrier feeds</li></ul>
+    </div>
+    <div class="field"><span class="field-label">Key KPIs</span>
+      <ul><li>Revenue &amp; COGS</li><li>Gross margin</li><li>OTIF — On Time In Full</li><li>Production scrap &amp; yield</li><li>Transport delay rate</li><li>Customer complaint rate</li><li>Inventory turns</li><li>Supplier performance</li></ul>
+    </div>
+    <div class="deep">The analytics dashboard combines operational and financial data into management insight. It helps leaders see whether the order was profitable, delivered on time, produced efficiently, transported reliably, and accepted by the customer — all in one view.</div>
+    <div class="risk"><strong>What could go wrong?</strong> Dashboards may report misleading KPIs if source data, timing, definitions, or joins are inconsistent. A functional consultant would define KPI logic, source ownership, data refresh rules, reconciliation checks, and business-approved reporting definitions.</div>
+  </article>
+
+  <!-- Summary: Application Roles -->
+  <section class="summary">
+    <h2>Application Roles Summary</h2>
+    <h3>Salesforce</h3>
+    <p>Front-office CRM. Used for leads, opportunities, quotes, customer communication, and service cases.</p>
+    <h3>SAP S/4HANA</h3>
+    <p>ERP backbone. Used for official sales orders, procurement, inventory, production, delivery, billing, finance, and controlling.</p>
+    <h3>SAP Ariba</h3>
+    <p>Supplier collaboration and sourcing. Used for supplier communication, sourcing events, contracts, confirmations, and procurement network activities.</p>
+    <h3>Manhattan WMS</h3>
+    <p>Warehouse execution. Used for receiving, putaway, bin management, picking, packing, loading, labour, and physical inventory execution.</p>
+    <h3>MES</h3>
+    <p>Factory execution. Used for machine-level production tracking, operator activity, confirmations, defects, and manufacturing genealogy.</p>
+    <h3>TMS</h3>
+    <p>Transport execution. Used for carrier selection, route planning, freight order management, tracking, and freight cost.</p>
+    <h3>SAP GTS</h3>
+    <p>Global trade compliance. Used for customs, export/import checks, denied party screening, and trade documentation.</p>
+    <h3>Middleware</h3>
+    <p>Integration layer. Used to connect systems, map fields, transform messages, monitor failures, retry messages, and keep the enterprise conversation alive.</p>
+
+    <h2 style="margin-top:36px;">End-to-End Flow</h2>
+    <ol>
+      <li>Salesforce Opportunity</li><li>Salesforce Closed Won</li><li>SAP Sales Order</li><li>ATP Check</li><li>MRP Run</li><li>Purchase Requisitions</li><li>Purchase Orders</li><li>Supplier Confirmation / Ariba</li><li>Goods Receipt of Components</li><li>Quality Inspection</li><li>Production Order</li><li>Component Goods Issue</li><li>Production Confirmation</li><li>Finished Goods Receipt</li><li>Stock Transfer / Intercompany</li><li>Export Delivery</li><li>GTS Compliance</li><li>WMS Picking and Packing</li><li>PGI from India</li><li>TMS Shipment Tracking</li><li>Goods Receipt in Germany</li><li>Customer Outbound Delivery</li><li>WMS Pick/Pack for Customer</li><li>PGI to Customer</li><li>Billing</li><li>Accounting</li><li>Customer Payment</li><li>Salesforce Service Case (if complaint)</li><li>Analytics and KPI Review</li>
+    </ol>
+  </section>
+
+  <footer class="colophon">
+    The Circuit Breaker That Went to Germany &nbsp;&#8212;&nbsp; A corporate drama with SAP documentation attached.
+  </footer>
+
+</section>
+
+</div>
+</body>
+</html>
